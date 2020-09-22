@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" >
+    <link rel="stylesheet" href="style.css">
+
+
+    <title>Hello, world!</title>
+</head>
+<body>
+<div id="app">
+    <div class="container">
+       <div class="card">
+           <div class="card-header bg-info mb-2">
+               <h3 class="text-center">VUE REST API CURD</h3>
+
+           </div>
+           <div class="alert alert-success" v-if="successText">{{successText}} <button class="float-right" @click="clearMessage()">X</button></div>
+           <div class="alert alert-danger" v-if="errorText">{{errorText}} <button class="float-right" @click="clearMessage()">X</button></div>
+
+        <div class="card-body">
+              <div class="pull-right mb-2">
+                  <button type="button" @click="showForm=true" class="btn btn-success">
+                      Add New User
+                  </button>
+              </div>
+            <div class="pull-left">
+                <h3>All USER</h3>
+            </div>
+        <table class="table">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th class="text-center">Action</th>
+            </tr>
+            <tr  v-for="user in users">
+                <td>{{user.id}}</td>
+                <td>{{user.name}}</td>
+                <td>{{user.email}}</td>
+                <td>{{user.phone}}</td>
+                <td class="text-center">
+                    <button class="btn btn-danger" @click="deleteUser(user.id)">Delete</button>
+                    <button class="btn btn-primary" @click="userUpdateModel=true; setUpdateDate(user)">Edit</button>
+
+                </td>
+            </tr>
+
+
+        </table>
+
+        </div>
+       </div>
+        <div class="mcard" v-if="showForm">
+            <div class="mcard-header">
+                <div>
+                    Add New User
+                    <button class="left" @click="showForm=false">X</button>
+
+                </div>
+
+
+            </div>
+            <div class="mcard-body" >
+                <form action="" @submit.prevent="submit">
+                    <table>
+                        <tr>
+                            <th>User Name:</th>
+                            <th><input type="text" v-model="form.name"></th>
+                        </tr>
+                        <tr>
+                            <th>User E-mail:</th>
+                            <th><input type="text" v-model="form.email"></th>
+                        </tr>
+                        <tr>
+                            <th>User Mobile:</th>
+                            <th><input type="text" v-model="form.phone"></th>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <th>
+                                <button @click="showForm=false;addUser()" :disabled="form.busy"  type="submit" class="btn btn-success">Save</button>
+                            </th>
+                        </tr>
+
+                    </table>
+
+                </form>
+
+            </div>
+        </div>
+
+        <div class="mcard" v-if="userUpdateModel">
+            <div class="mcard-header">
+                <div>
+                    Update User
+                    <button class="left" @click="userUpdateModel=false">X</button>
+
+                </div>
+
+
+            </div>
+            <div class="mcard-body" >
+                <form action="" @submit.prevent="submit">
+                    <table>
+                        <tr>
+                            <th>User Name:</th>
+                            <th><input type="text" v-model="updateUserN.name"></th>
+                        </tr>
+                        <tr>
+                            <th>User E-mail:</th>
+                            <th><input type="text" v-model="updateUserN.email"></th>
+                        </tr>
+                        <tr>
+                            <th>User Mobile:</th>
+                            <th><input type="text" v-model="updateUserN.phone"></th>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <th>
+                                <button @click="userUpdateModel=false;updateUser()" :disabled="form.busy"  type="submit" class="btn btn-success">Update</button>
+                            </th>
+                        </tr>
+
+                    </table>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<!-- Optional JavaScript -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" ></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" ></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script>
+
+    var app = new Vue({
+        el: '#app',
+        data: {
+            users:[],
+            form: {
+                name:null,
+                email:null,
+                phone:null
+            },
+            showForm: false,
+            errorText:null,
+            successText:null,
+            userUpdateModel:false,
+            updateUserN:{}
+
+
+        },
+        methods:{
+            getData: function () {
+                axios.get("http://localhost/VueCURD/api.php?action=read")
+                .then(function (response) {
+                    if (!response.data.error){
+                        app.users=response.data.users;
+                    }else{
+                        app.errorText=response.data.message;
+
+                    }
+
+                })
+
+
+            },
+            toFormData: function(obj){
+              let data= new FormData();
+              for (let key in obj){
+                  data.append(key,obj[key]);
+              }
+              return data;
+            },
+            addUser: function () {
+                let formData=this.toFormData(this.form);
+                axios.post("http://localhost/VueCURD/api.php?action=create",formData)
+                .then(function (response) {
+                    if (response.data.error){
+                        app.errorText=response.data.message;
+                    }else{
+                         app.form.name=null,
+                             app.form.email=null,
+                             app.form.phone=null,
+                             app.successText=response.data.message;
+
+                       app.getData();
+                    }
+
+
+                })
+
+            },
+            updateUser: function () {
+                let formData=this.toFormData(this.updateUserN);
+                axios.post("http://localhost/VueCURD/api.php?action=update",formData)
+                    .then(function (response) {
+                        if (response.data.error){
+                            app.errorText=response.data.message;
+                        }else{
+                                app.updateUserN=null;
+                                app.successText=response.data.message;
+                                app.getData();
+                        }
+
+
+                    })
+
+            },
+            deleteUser: function (id) {
+                let formData=this.toFormData({id:id});
+                axios.post("http://localhost/VueCURD/api.php?action=delete",formData)
+                    .then(function (response) {
+                        if (response.data.error){
+                            app.errorText=response.data.message;
+                        }else{
+
+                                app.successText=response.data.message;
+
+                            app.getData();
+                        }
+
+
+                    })
+
+
+
+            },
+            setUpdateDate:function(user){
+                this.updateUserN=user;
+
+            },
+            clearMessage: function () {
+                this.errorText=null;
+                this.successText=null;
+
+            },
+
+        },
+        mounted: function () {
+            this.getData();
+        }
+    })
+
+</script>
+</body>
+</html>

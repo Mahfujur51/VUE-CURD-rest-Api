@@ -1,0 +1,27 @@
+
+.left{
+    float: right;
+}
+.mcard{
+    position: fixed;
+    font-family: sans-serif;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(0,0,0,.5);
+    width: 350px;
+    max-height: 200px;
+    margin: auto;
+}
+.mcard-header{
+    background: #0a7292;
+    color: white;
+    padding: 10px;
+    max-height: 200px;
+}
+.mcard-body{
+    padding: 10px;
+    color: white;
+
+}
